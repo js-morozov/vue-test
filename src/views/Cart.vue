@@ -40,6 +40,9 @@
             <td>
               <div class="nowrap pt-2">{{ item.price * item.quantity }}$</div>
             </td>
+            <td>
+              <i class="fas fa-trash delete-icon" @click="deleteItemCart(--index)"></i>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -53,29 +56,15 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   name: "Cart",
   data() {
-    return {
-      cart: [
-        {
-          name: "JavaScript. Подробное руководство. Дэвид Флэнаган.",
-          total: 31,
-          price: 18,
-          quantity: 1,
-          category: "Книги"
-        },
-        {
-          name: "Постный фаршированный перец",
-          total: 76,
-          price: 1.52,
-          quantity: 1,
-          category: "Еда"
-        }
-      ]
-    };
+    return {};
   },
   computed: {
+    ...mapGetters(["cart"]),
     total() {
       let sum = 0;
       this.cart.forEach(item => {
@@ -83,13 +72,18 @@ export default {
       });
       return sum;
     }
+  },
+  methods: {
+    deleteItemCart(index) {
+      this.$store.commit("deleteCartItem", index);
+    }
   }
 };
 </script>
 
 <style>
 .table tr td:nth-child(2) {
-  width: 100%;
+  min-width: 50%;
 }
 .form-group {
   display: flex;
@@ -103,5 +97,13 @@ export default {
   font-size: 24px;
   font-weight: bold;
   padding-left: 10px;
+}
+.delete-icon {
+  cursor: pointer;
+  padding-top: 12px;
+  transition: all ease-in 0.2s;
+}
+.delete-icon:hover {
+  opacity: 0.5;
 }
 </style>
