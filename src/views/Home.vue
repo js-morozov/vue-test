@@ -19,33 +19,7 @@
     </div>
     <div v-for="(item, index) in shop" :key="index" class="mb-4">
       <h4 class="pb-2">{{ item.category }}</h4>
-      <table class="table">
-        <thead class="thead-dark">
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Название</th>
-            <th scope="col" class="nowrap">Цена, руб.</th>
-            <th>&nbsp;</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(product, i) in item.products" :key="i">
-            <th scope="row">{{ ++i }}.</th>
-            <td>
-              {{ product.name }}
-              <span class="badge badge-dark badge-pill">{{ product.total }}</span>
-            </td>
-            <td>{{ product.price }}</td>
-            <td>
-              <button
-                type="button"
-                class="btn btn-outline-success"
-                @click="addToCart($event, product)"
-              >Добавить</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <custom-table :products="item.products" />
     </div>
   </div>
 </template>
@@ -53,8 +27,12 @@
 <script>
 import axios from "axios";
 import { mapGetters, mapActions } from "vuex";
+import CustomTable from "@/components/CustomTable";
 
 export default {
+  components: {
+    CustomTable
+  },
   name: "App",
   data() {
     return {
@@ -74,6 +52,7 @@ export default {
       }
     },
 
+    // Список продуктов из файлов data.json и names.json
     products() {
       if (!this.goods.length) return [];
 
@@ -102,6 +81,7 @@ export default {
       });
     },
 
+    // Список уникальный групп / категорий
     groups() {
       return this.products
         .map(group => {
@@ -110,6 +90,7 @@ export default {
         .filter((item, index, arr) => arr.indexOf(item) == index);
     },
 
+    // Сформированные товары для отображения
     shop() {
       return this.groups.map(item => {
         return {
@@ -129,17 +110,10 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["exchangeDollar"]),
-    addToCart($event, product) {
-      $event.target.className = "btn btn-success";
-      $event.target.innerText = "Добавлено";
-      $event.target.disabled = true;
-
-      this.$store.dispatch("addProductToCart", product);
-    }
+    ...mapActions(["exchangeDollar"])
   },
-  async mounted() {
-    await axios.get("./data/data.json").then(({ data }) => {
+  mounted() {
+    axios.get("./data/data.json").then(({ data }) => {
       if (data.Success) {
         this.goods = data.Value.Goods;
       } else {
@@ -147,24 +121,9 @@ export default {
       }
     });
 
-    await axios.get("./data/names.json").then(({ data }) => {
+    axios.get("./data/names.json").then(({ data }) => {
       this.names = data;
     });
   }
 };
 </script>
-
-<style scoped>
-.btn {
-  width: 110px;
-}
-.table tr td:nth-child(2) {
-  width: 100%;
-}
-.form-control {
-  width: 100px;
-}
-.nowrap {
-  white-space: nowrap;
-}
-</style>

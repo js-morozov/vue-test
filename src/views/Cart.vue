@@ -72,11 +72,10 @@ import { mapGetters, mapMutations } from "vuex";
 
 export default {
   name: "Cart",
-  data() {
-    return {};
-  },
   computed: {
     ...mapGetters(["cart"]),
+
+    // Подсчет суммы товаров в корзине
     total() {
       return this.cart.reduce((prev, item) => {
         return prev + item.price * item.quantity;
