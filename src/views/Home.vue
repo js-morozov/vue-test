@@ -7,6 +7,16 @@
         </router-link>
       </li>
     </ul>
+    <div class="row">
+      <div class="col-3">
+        <div class="input-group mt-3 mb-5">
+          <div class="input-group-prepend">
+            <span class="input-group-text">$</span>
+          </div>
+          <input type="number" class="form-control" v-model="exchange" />
+        </div>
+      </div>
+    </div>
     <div v-for="(item, index) in shop" :key="index" class="mb-4">
       <h4 class="pb-2">{{ item.category }}</h4>
       <table class="table">
@@ -14,7 +24,7 @@
           <tr>
             <th scope="col">#</th>
             <th scope="col">Название</th>
-            <th scope="col">Цена</th>
+            <th scope="col" class="nowrap">Цена, руб.</th>
             <th>&nbsp;</th>
           </tr>
         </thead>
@@ -30,7 +40,7 @@
               <button
                 type="button"
                 class="btn btn-outline-success"
-                @click="addToCart(product)"
+                @click="addToCart($event, product)"
               >Добавить</button>
             </td>
           </tr>
@@ -42,6 +52,7 @@
 
 <script>
 import axios from "axios";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "App",
@@ -52,6 +63,17 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(["cart"]),
+
+    exchange: {
+      get() {
+        return this.$store.getters["exchange"];
+      },
+      set(newValue) {
+        this.exchangeDollar(newValue);
+      }
+    },
+
     products() {
       if (!this.goods.length) return [];
 
@@ -98,7 +120,8 @@ export default {
               return {
                 name: i.productName,
                 total: i.total,
-                price: i.price
+                price: Math.round(i.price * this.exchange * 100) / 100,
+                productCategory: item
               };
             })
         };
@@ -106,8 +129,13 @@ export default {
     }
   },
   methods: {
-    addToCart(item) {
-      console.log(item);
+    ...mapActions(["exchangeDollar"]),
+    addToCart($event, product) {
+      $event.target.className = "btn btn-success";
+      $event.target.innerText = "Добавлено";
+      $event.target.disabled = true;
+
+      this.$store.dispatch("addProductToCart", product);
     }
   },
   async mounted() {
@@ -126,11 +154,17 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+.btn {
+  width: 110px;
+}
 .table tr td:nth-child(2) {
   width: 100%;
 }
 .form-control {
   width: 100px;
+}
+.nowrap {
+  white-space: nowrap;
 }
 </style>

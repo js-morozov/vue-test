@@ -26,29 +26,41 @@
             <td>
               {{ item.name }}
               <br />
-              <span class="badge badge-info">{{ item.category }}</span>
+              <span class="badge badge-info">{{ item.productCategory }}</span>
             </td>
             <td>
               <div class="form-group">
-                <input type="number" class="form-control" v-model="item.quantity" />
-                <span class="ml-2">шт.</span>
+                <input
+                  type="number"
+                  min="1"
+                  :max="item.total"
+                  class="form-control"
+                  v-model.number="item.quantity"
+                />
+                <span class="mx-2">шт.</span>
               </div>
+              <div
+                class="alert alert-danger nowrap"
+                v-if="item.quantity >= item.total"
+                role="alert"
+              >Количество ограничено</div>
             </td>
             <td>
-              <div class="nowrap pt-2">{{ item.price }}$</div>
+              <div class="nowrap pt-2">{{ item.price }}</div>
             </td>
             <td>
-              <div class="nowrap pt-2">{{ item.price * item.quantity }}$</div>
+              <div class="nowrap pt-2">{{ Math.round((item.price * item.quantity) * 100) / 100 }}</div>
             </td>
             <td>
-              <i class="fas fa-trash delete-icon" @click="deleteItemCart(--index)"></i>
+              <i class="fas fa-trash delete-icon" @click="deleteCartItem(--index)"></i>
             </td>
           </tr>
         </tbody>
       </table>
       <div class="alert alert-info text-right" role="alert">
         Общая стоимость:
-        <span class="price text-dark">{{total}} $</span>
+        <span class="price text-dark">{{ Math.round(total * 100) / 100 }}</span>
+        руб.
       </div>
     </div>
     <div class="alert alert-warning" role="alert" v-else>В корзине нет товаров</div>
@@ -56,7 +68,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 
 export default {
   name: "Cart",
@@ -66,22 +78,18 @@ export default {
   computed: {
     ...mapGetters(["cart"]),
     total() {
-      let sum = 0;
-      this.cart.forEach(item => {
-        sum += item.price * item.quantity;
-      });
-      return sum;
+      return this.cart.reduce((prev, item) => {
+        return prev + item.price * item.quantity;
+      }, 0);
     }
   },
   methods: {
-    deleteItemCart(index) {
-      this.$store.commit("deleteCartItem", index);
-    }
+    ...mapMutations(["deleteCartItem"])
   }
 };
 </script>
 
-<style>
+<style scoped>
 .table tr td:nth-child(2) {
   min-width: 50%;
 }

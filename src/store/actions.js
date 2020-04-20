@@ -1,7 +1,11 @@
 const actions = {
-  // updateStarredPage({ commit }, payload) {
-  //   commit('UPDATE_STARRED_PAGE', payload)
-  // }
+  addProductToCart({ commit }, product) {
+    commit('addProductToCart', product)
+  },
+
+  exchangeDollar({ commit }, price) {
+    commit('exchangeDollar', price)
+  }
 }
 
 export default actions
