@@ -12,6 +12,14 @@ const mutations = {
 
   exchangeDollar(state, price) {
     state.exchange = price
+  },
+
+  setDataJSON(state, data) {
+    state.dataJSON = data
+  },
+
+  setNamesJSON(state, names) {
+    state.namesJSON = names
   }
 }
 

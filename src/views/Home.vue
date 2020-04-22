@@ -25,7 +25,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { mapGetters, mapActions } from "vuex";
 import CustomTable from "@/components/CustomTable";
 
@@ -41,7 +40,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["cart"]),
+    ...mapGetters(["cart", "shop"]),
 
     exchange: {
       get() {
@@ -50,80 +49,13 @@ export default {
       set(newValue) {
         this.exchangeDollar(newValue);
       }
-    },
-
-    // Список продуктов из файлов data.json и names.json
-    products() {
-      if (!this.goods.length) return [];
-
-      return this.goods.map(item => {
-        let groupName = "";
-        let productName = "";
-
-        for (let groupID in this.names) {
-          if (+item.G === +groupID) {
-            groupName = this.names[groupID].G;
-
-            for (let productId in this.names[groupID].B) {
-              if (+item.T === +productId) {
-                productName = this.names[groupID].B[productId].N;
-              }
-            }
-          }
-        }
-
-        return {
-          groupName,
-          total: item.P,
-          price: item.C,
-          productName
-        };
-      });
-    },
-
-    // Список уникальный групп / категорий
-    groups() {
-      return this.products
-        .map(group => {
-          return group.groupName;
-        })
-        .filter((item, index, arr) => arr.indexOf(item) == index);
-    },
-
-    // Сформированные товары для отображения
-    shop() {
-      return this.groups.map(item => {
-        return {
-          category: item,
-          products: this.products
-            .filter(i => i.groupName === item)
-            .map(i => {
-              return {
-                name: i.productName,
-                total: i.total,
-                price: Math.round(i.price * this.exchange * 100) / 100,
-                productCategory: item
-              };
-            })
-        };
-      });
     }
   },
   methods: {
-    ...mapActions(["exchangeDollar"])
+    ...mapActions(["getShopData", "exchangeDollar"])
   },
-  mounted() {
-    axios.get("./data/data.json").then(({ data }) => {
-      if (data.Success) {
-        this.goods = data.Value.Goods;
-      } else {
-        console.error(data.Error);
-      }
-    });
-
-    axios.get("./data/names.json").then(({ data }) => {
-      this.names = data;
-    });
+  async created() {
+    await this.getShopData();
   }
 };
 </script>
